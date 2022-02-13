@@ -76,12 +76,17 @@ void Session::processQuery(const std::string &query)
         std::ostringstream oss;
         db::printTable(db::query::symdifference(m_db["A"], m_db["B"]), oss);
         answer = oss.str() + "OK";
+    } else {
+        answer = "ERR supported commands:\n"
+                 "    INSERT table id name\n"
+                 "    TRUNCATE table\n"
+                 "    INTERSECTION\n"
+                 "    SYMMETRIC_DIFFERENCE\n"
+                 ;
     }
 
-    if (!answer.empty()) {
-        std::memcpy(m_buffer, answer.c_str(), answer.size());
-        doWrite(answer.size());
-    }
+    std::memcpy(m_buffer, answer.c_str(), answer.size());
+    doWrite(answer.size());
 }
 
 }

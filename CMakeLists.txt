@@ -53,6 +53,7 @@ target_link_libraries(
 target_link_libraries(
     join_client
         ${Boost_LIBRARIES}
+        ${CMAKE_THREAD_LIBS_INIT}
 )
 
 # Compiler options
