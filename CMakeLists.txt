@@ -16,7 +16,7 @@ set (
     SOURCES
         server.cpp
         session.cpp
-        db.h
+        db.cpp
         main.cpp
 )
 

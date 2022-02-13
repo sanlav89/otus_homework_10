@@ -47,26 +47,41 @@ void Session::processQuery(const std::string &query)
 {
     std::vector<std::string> queryArgs;
     boost::split(queryArgs, query, boost::is_any_of(" "));
-//    std::size_t length = 0;
+    std::string answer;
+
     if (queryArgs.size() == 4 && queryArgs[0] == "INSERT") {
-
-        if (queryArgs[1] != "A" && queryArgs[1] != "B") {
-
+        if (m_db.find(queryArgs[1]) == m_db.end()) {
+            answer = "ERR database doesn't contain table " + queryArgs[1];
+        } else {
+            auto ok = db::query::insert(m_db[queryArgs[1]],
+                    std::stoi(queryArgs[2]), {queryArgs[3]});
+            if (ok) {
+                answer = "OK";
+            } else {
+                answer = "ERR duplicate " + queryArgs[2];
+            }
         }
-
-//        if (queryArgs[1] == "A"
-//                && db::query::insert(m_tableA, std::stoi(queryArgs[2]), {queryArgs[3]})) {
-
-//        }
     } else if (queryArgs.size() == 2 && queryArgs[0] == "TRUNCATE") {
-
+        if (m_db.find(queryArgs[1]) == m_db.end()) {
+            answer = "ERR database doesn't contain table " + queryArgs[1];
+        } else {
+            db::query::truncate(m_db[queryArgs[1]]);
+            answer = "OK";
+        }
     } else if (queryArgs.size() == 1 && queryArgs[0] == "INTERSECTION") {
-
+        std::ostringstream oss;
+        db::printTable(db::query::intersection(m_db["A"], m_db["B"]), oss);
+        answer = oss.str() + "OK";
     } else if (queryArgs.size() == 1 && queryArgs[0] == "SYMMETRIC_DIFFERENCE") {
-
+        std::ostringstream oss;
+        db::printTable(db::query::symdifference(m_db["A"], m_db["B"]), oss);
+        answer = oss.str() + "OK";
     }
 
-//    doWrite(length);
+    if (!answer.empty()) {
+        std::memcpy(m_buffer, answer.c_str(), answer.size());
+        doWrite(answer.size());
+    }
 }
 
 }
