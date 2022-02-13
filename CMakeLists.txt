@@ -14,6 +14,8 @@ include_directories(${Boost_INCLUDE_DIR})
 # SOURCES
 set (
     SOURCES
+        server.cpp
+        session.cpp
         db.h
         main.cpp
 )
