@@ -30,11 +30,13 @@ set (
 
 # EXECUTABLE
 add_executable(join_server ${SOURCES} ${HEADERS})
+add_executable(join_client join_client.cpp)
 add_executable(gtest_query gtest_query.cpp db.cpp)
 
 # PROPERTIES
 set_target_properties (
     join_server
+    join_client
     gtest_query
         PROPERTIES
             CMAKE_CXX_STANDARD 17
@@ -48,9 +50,17 @@ target_link_libraries(
         ${CMAKE_THREAD_LIBS_INIT}
 )
 
+target_link_libraries(
+    join_client
+        ${Boost_LIBRARIES}
+)
+
 # Compiler options
 if (MSVC)
     target_compile_options(join_server PRIVATE
+        /W4
+    )
+    target_compile_options(join_client PRIVATE
         /W4
     )
     target_compile_options(gtest_query PRIVATE
@@ -58,6 +68,9 @@ if (MSVC)
     )
 else ()
     target_compile_options(join_server PRIVATE
+        -Wall -Wextra -pedantic -Werror
+    )
+    target_compile_options(join_client PRIVATE
         -Wall -Wextra -pedantic -Werror
     )
     target_compile_options(gtest_query PRIVATE
