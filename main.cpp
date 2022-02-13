@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
         }
 
         boost::asio::io_context io_context;
-        bulk::Server server(io_context, std::atoi(argv[1]));
+        join::Server server(io_context, std::atoi(argv[1]));
         io_context.run();
 
     } catch (const std::exception& ex) {
