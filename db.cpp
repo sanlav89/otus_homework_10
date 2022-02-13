@@ -2,6 +2,17 @@
 
 namespace db {
 
+void printTable(const table_t &table, std::ostream &os)
+{
+    for (const auto &pair : table) {
+        os << pair.first;
+        for (const auto &name : pair.second) {
+            os << "," << name;
+        }
+        os << std::endl;
+    }
+}
+
 namespace query {
 
 bool insert(table_t &table, const id_t &id, const name_t &name)

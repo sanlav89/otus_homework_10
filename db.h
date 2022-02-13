@@ -3,12 +3,15 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <iostream>
 
 namespace db {
 
 using id_t = int;
 using name_t = std::vector<std::string>;
 using table_t = std::map<id_t, name_t>;
+
+void printTable(const db::table_t &table, std::ostream &os = std::cout);
 
 namespace query {
 

@@ -31,4 +31,4 @@ private:
     tcp::acceptor m_acceptor;
 };
 
-};
+}
