@@ -3,9 +3,9 @@
 
 namespace join {
 
-Session::Session(tcp::socket socket, db::db_t &db)
+Session::Session(tcp::socket socket, db::DataBase &database)
     : m_socket(std::move(socket))
-    , m_db(db)
+    , m_database(database)
 {
 }
 
@@ -50,32 +50,14 @@ void Session::processQuery(const std::string &query)
     std::string answer;
 
     if (queryArgs.size() == 4 && queryArgs[0] == "INSERT") {
-        if (m_db.find(queryArgs[1]) == m_db.end()) {
-            answer = "ERR database doesn't contain table " + queryArgs[1];
-        } else {
-            auto ok = db::query::insert(m_db[queryArgs[1]],
-                    std::stoi(queryArgs[2]), {queryArgs[3]});
-            if (ok) {
-                answer = "OK";
-            } else {
-                answer = "ERR duplicate " + queryArgs[2];
-            }
-        }
+        answer = m_database.insert(queryArgs[1], std::stoi(queryArgs[2]), queryArgs[3]);
     } else if (queryArgs.size() == 2 && queryArgs[0] == "TRUNCATE") {
-        if (m_db.find(queryArgs[1]) == m_db.end()) {
-            answer = "ERR database doesn't contain table " + queryArgs[1];
-        } else {
-            db::query::truncate(m_db[queryArgs[1]]);
-            answer = "OK";
-        }
+        answer = m_database.truncate(queryArgs[1]);
     } else if (queryArgs.size() == 1 && queryArgs[0] == "INTERSECTION") {
         std::ostringstream oss;
-        db::printTable(db::query::intersection(m_db["A"], m_db["B"]), oss);
-        answer = oss.str() + "OK";
+        answer = m_database.intersection();
     } else if (queryArgs.size() == 1 && queryArgs[0] == "SYMMETRIC_DIFFERENCE") {
-        std::ostringstream oss;
-        db::printTable(db::query::symdifference(m_db["A"], m_db["B"]), oss);
-        answer = oss.str() + "OK";
+        answer = m_database.symdifference();
     } else {
         answer = "ERR supported commands:\n"
                  "    INSERT table id name\n"

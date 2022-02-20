@@ -3,7 +3,7 @@
 #include <memory>
 #include <iostream>
 #include <boost/asio.hpp>
-#include "db.h"
+#include "database.h"
 
 namespace join {
 
@@ -14,7 +14,7 @@ const int max_length = 1024;
 class Session : public std::enable_shared_from_this<Session>
 {
 public:
-    Session(tcp::socket socket, db::db_t &db);
+    Session(tcp::socket socket, db::DataBase &database);
 
     void start();
 
@@ -22,7 +22,7 @@ private:
 
     tcp::socket m_socket;
     buffer_t m_buffer[max_length];
-    db::db_t &m_db;
+    db::DataBase &m_database;
 
     void doRead();
 
