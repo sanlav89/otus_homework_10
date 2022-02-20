@@ -1,45 +1,57 @@
 #pragma once
 
-#include <map>
-#include <vector>
-#include <string>
 #include <iostream>
+
+#include "table.h"
 
 namespace db {
 
-using id_t = int;
-using name_t = std::vector<std::string>;
-using table_t = std::map<id_t, name_t>;
-using db_t = std::map<std::string, table_t>;
+class IDataBase
+{
+public:
+    virtual std::string insert(const tablename_t &tableName, const id_t &id, const name_t &name) = 0;
+    virtual std::string truncate(const tablename_t &tableName) = 0;
+    virtual std::string intersection() = 0;
+    virtual std::string symdifference() = 0;
+};
 
-void printTable(const db::table_t &table, std::ostream &os = std::cout);
+class DataBase : public IDataBase
+{
+public:
+    DataBase();
+    ~DataBase() = default;
 
-namespace query {
+    /**
+     * @brief insert
+     * Complexity: O(log(N)), N = table.size()
+     */
+    std::string insert(const tablename_t &tableName, const id_t &id, const name_t &name) override;
 
-/**
- * @brief insert
- * Complexity: O(log(N)), N = table.size()
- */
-bool insert(table_t &table, const id_t &id, const name_t &name);
+    /**
+     * @brief truncate
+     * Complexity: O(N), N = table.size()
+     */
+    std::string truncate(const tablename_t &tableName) override;
 
-/**
- * @brief truncate
- * Complexity: O(N), N = table.size()
- */
-bool truncate(table_t &table);
+    /**
+     * @brief intersection
+     * Complexity: O(min{N1, N2}), N1 = table1.size(), N2 = table2.size()
+     */
+    std::string intersection() override;
 
-/**
- * @brief intersection
- * Complexity: O(min{N1, N2}), N1 = table1.size(), N2 = table2.size()
- */
-table_t intersection(const table_t &table1, const table_t &table2);
+    /**
+     * @brief symdifference
+     * Complexity: O(max{N1, N2}), N1 = table1.size(), N2 = table2.size()
+     */
+    std::string symdifference() override;
 
-/**
- * @brief symdifference
- * Complexity: O(max{N1, N2}), N1 = table1.size(), N2 = table2.size()
- */
-table_t symdifference(const table_t &table1, const table_t &table2);
+private:
 
-}
+    Table<4> m_tableA;
+    Table<4> m_tableB;
+
+    void loadInitData();
+
+};
 
 }

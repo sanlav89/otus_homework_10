@@ -26,6 +26,7 @@ set (
         server.h
         session.h
         db.h
+        table.h
  )
 
 # EXECUTABLE
