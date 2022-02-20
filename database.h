@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-
+#include <memory>
 #include "table.h"
 
 namespace db {
@@ -47,8 +47,8 @@ public:
 
 private:
 
-    Table<4> m_tableA;
-    Table<4> m_tableB;
+    std::unique_ptr<Table<>> m_tableA;
+    std::unique_ptr<Table<>> m_tableB;
 
     void loadInitData();
 

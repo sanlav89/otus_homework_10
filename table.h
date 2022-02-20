@@ -1,33 +1,34 @@
 #pragma once
 
 #include <map>
-#include <vector>
+#include <list>
 #include <array>
 #include <string>
 #include <cassert>
+#include <shared_mutex>
 
 namespace db {
 
 using id_t = int;
 using name_t = std::string;
 using tablename_t = std::string;
-using map_t = std::map<id_t, std::pair<std::size_t, std::size_t>>;
 
 /**
  *  Класс Table - одна таблица из базы данных
- *  Постарался соблюсти некоторые принципы проектирования БД. А именно:
- *  - данные хранятся блоками размером ChunkSize;
- *  - доступ к каждому "кортежу" (строке) не блокирует всю таблицу,
- *    блокирует только конкретную строку;
- *  - для быстрого доступа к элементам есть общий словарь, который хранит
- *    индексы;
- *  -
- *
+ *  Для простоты предположил, что для хранения БД есть некий ограниченный
+ *  объем памяти, поэтому воспользовался std::array для моделирования этой
+ *  памяти. Не стал заморачиваться с хранением на жестком диске и т.п.
+ *  Выбор такой структуры данных обусловлен тем, что будут минимизированы
+ *  блокировки: блокируется только конкретная строка из таблицы (не вся таблица).
+ *  Для более быстрого доступа к элементам  array организована вспомогательная
+ *  структура данных на std::map, которая хранит соответсвие {id, индекс}
  */
-template<std::size_t ChunkSize = 10>
+template<std::size_t MaxSize = 100>
 class Table
 {
-    using storage_t = std::vector<std::array<name_t, ChunkSize>>;
+    using storage_t = std::array<name_t, MaxSize>;
+    using map_t = std::map<id_t, std::size_t>;
+    using mapiter_t = map_t::iterator;
 
 public:
 
@@ -35,7 +36,7 @@ public:
     {
     public:
         TableIterator() = default;
-        TableIterator(const map_t::iterator &it, const storage_t &data)
+        TableIterator(const mapiter_t &it, const storage_t &data)
             : m_it(it)
             , m_data(data)
         {
@@ -75,24 +76,24 @@ public:
 
         name_t second() const
         {
-            assert(m_it->second.first < m_data.size());
-            assert(m_it->second.second < m_data[m_it->second.first].size());
-            return m_data[m_it->second.first][m_it->second.second];
+            assert(m_it->second < MaxSize);
+            return m_data[m_it->second];
         }
 
     private:
-        map_t::iterator m_it;
+        mapiter_t m_it;
         const storage_t &m_data;
     };
 
 
     Table(const tablename_t &name)
         : m_name(name)
-        , m_currentChunk(0)
-        , m_currentNode(0)
+        , m_currentSize(0)
     {
-        m_data.reserve(10);
     }
+
+    Table(const Table &) = delete;
+    Table(Table &&) = delete;
 
     bool insert(const id_t &id, const name_t &name)
     {
@@ -100,29 +101,22 @@ public:
             return false;
         }
 
-        if (m_data.empty()) {
-            m_data.push_back(std::array<name_t, ChunkSize>());
+        if (m_currentSize < MaxSize) {
+            m_mutex.lock();
+            m_data[m_currentSize] = name;
+            m_map[id] = m_currentSize++;
+            m_mutex.unlock();
+            return true;
+        } else {
+            return false;
         }
 
-        if (m_currentNode == ChunkSize) {
-            m_currentNode = 0;
-            m_data.push_back(std::array<name_t, ChunkSize>());
-            m_currentChunk++;
-        }
-
-        m_data[m_currentChunk][m_currentNode] = name;
-        m_map[id] = {m_currentChunk, m_currentNode};
-        m_currentNode++;
-
-        return true;
     }
 
     void truncate()
     {
         m_map.clear();
-        m_data.clear();
-        m_currentChunk = 0;
-        m_currentNode = 0;
+        m_currentSize = 0;
     }
 
     TableIterator begin()
@@ -144,8 +138,8 @@ private:
     tablename_t m_name;
     map_t m_map;
     storage_t m_data;
-    std::size_t m_currentChunk;
-    std::size_t m_currentNode;
+    std::size_t m_currentSize;
+    std::mutex m_mutex;
 
 };
 
