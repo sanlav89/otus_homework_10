@@ -16,7 +16,7 @@ set (
     SOURCES
         server.cpp
         session.cpp
-        db.cpp
+        database.cpp
         main.cpp
 )
 
@@ -25,20 +25,20 @@ set (
      HEADERS
         server.h
         session.h
-        db.h
+        database.h
         table.h
  )
 
 # EXECUTABLE
 add_executable(join_server ${SOURCES} ${HEADERS})
 add_executable(join_client join_client.cpp)
-add_executable(gtest_query gtest_query.cpp db.cpp)
+add_executable(gtest_database gtest_database.cpp database.cpp)
 
 # PROPERTIES
 set_target_properties (
     join_server
     join_client
-    gtest_query
+    gtest_database
         PROPERTIES
             CMAKE_CXX_STANDARD 17
             CMAKE_CXX_STANDARD_REQUIRED ON
@@ -65,7 +65,7 @@ if (MSVC)
     target_compile_options(join_client PRIVATE
         /W4
     )
-    target_compile_options(gtest_query PRIVATE
+    target_compile_options(gtest_database PRIVATE
         /W4
     )
 else ()
@@ -75,7 +75,7 @@ else ()
     target_compile_options(join_client PRIVATE
         -Wall -Wextra -pedantic -Werror
     )
-    target_compile_options(gtest_query PRIVATE
+    target_compile_options(gtest_database PRIVATE
         -Wall -Wextra -pedantic -Werror
     )
 endif()
@@ -102,13 +102,13 @@ FetchContent_MakeAvailable(googletest)
 include(GoogleTest)
 
 # Tests linking
-gtest_discover_tests(gtest_query)
+gtest_discover_tests(gtest_database)
 target_link_libraries(
-    gtest_query
+    gtest_database
     gtest_main
 )
 
 # Testing
 enable_testing()
-add_test(gtest_query gtest_query)
+add_test(gtest_database gtest_database)
 

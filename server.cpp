@@ -14,7 +14,7 @@ void Server::doAccept()
         [this](boost::system::error_code error, tcp::socket socket)
         {
             if (!error) {
-                std::make_shared<Session>(std::move(socket), m_db)->start();
+                std::make_shared<Session>(std::move(socket), m_database)->start();
             }
             doAccept();
         }

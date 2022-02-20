@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <iostream>
-#include "db.h"
+#include "database.h"
 
 TEST(DbTest, Insert)
 {

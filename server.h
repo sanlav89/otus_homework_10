@@ -14,7 +14,7 @@ private:
     void doAccept();
 
     tcp::acceptor m_acceptor;
-    db::DataBase m_db;
+    db::DataBase m_database;
 };
 
 }

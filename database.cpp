@@ -1,4 +1,4 @@
-#include "db.h"
+#include "database.h"
 #include <iostream>
 
 namespace db {

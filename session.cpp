@@ -3,9 +3,9 @@
 
 namespace join {
 
-Session::Session(tcp::socket socket, db::DataBase &db)
+Session::Session(tcp::socket socket, db::DataBase &database)
     : m_socket(std::move(socket))
-    , m_db(db)
+    , m_database(database)
 {
 }
 
@@ -50,14 +50,14 @@ void Session::processQuery(const std::string &query)
     std::string answer;
 
     if (queryArgs.size() == 4 && queryArgs[0] == "INSERT") {
-        answer = m_db.insert(queryArgs[1], std::stoi(queryArgs[2]), queryArgs[3]);
+        answer = m_database.insert(queryArgs[1], std::stoi(queryArgs[2]), queryArgs[3]);
     } else if (queryArgs.size() == 2 && queryArgs[0] == "TRUNCATE") {
-        answer = m_db.truncate(queryArgs[1]);
+        answer = m_database.truncate(queryArgs[1]);
     } else if (queryArgs.size() == 1 && queryArgs[0] == "INTERSECTION") {
         std::ostringstream oss;
-        answer = m_db.intersection();
+        answer = m_database.intersection();
     } else if (queryArgs.size() == 1 && queryArgs[0] == "SYMMETRIC_DIFFERENCE") {
-        answer = m_db.symdifference();
+        answer = m_database.symdifference();
     } else {
         answer = "ERR supported commands:\n"
                  "    INSERT table id name\n"
